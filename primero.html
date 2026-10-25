@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Espero que te guste</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #010107;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    body {
+      color: white;
+    }
+
+    #galaxia {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: scale(1.12);
+      transition: opacity 3s ease, transform 8s ease;
+      z-index: 0;
+    }
+
+    body.iniciada #galaxia {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .capa-oscura {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 3s ease;
+      background:
+        radial-gradient(
+          ellipse at center,
+          transparent 10%,
+          rgba(0, 0, 0, 0.2) 55%,
+          rgba(0, 0, 0, 0.8) 100%
+        );
+    }
+
+    body.iniciada .capa-oscura {
+      opacity: 1;
+    }
+
+    .pantalla {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .contenido-inicial {
+      transition: opacity 2s ease, transform 2s ease;
+    }
+
+    body.iniciada .contenido-inicial {
+      opacity: 0;
+      transform: scale(0.8) translateY(-30px);
+      pointer-events: none;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 7vw, 5.5rem);
+      font-weight: normal;
+      line-height: 1.1;
+      text-shadow:
+        0 0 10px #fff,
+        0 0 22px #ff9ee8,
+        0 0 50px #9a49ff;
+      animation: latido 4s ease-in-out infinite;
+    }
+
+    .mensaje {
+      margin-top: 24px;
+      color: #ffe6f8;
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      line-height: 1.6;
+      text-shadow: 0 0 12px #ef62d3;
+    }
+
+    #botonPlay {
+      margin-top: 35px;
+      padding: 15px 34px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50px;
+      color: white;
+      background: linear-gradient(135deg, #f647ab, #6b39ea);
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow:
+        0 0 20px rgba(255, 84, 199, 0.85),
+        inset 0 0 14px rgba(255, 255, 255, 0.2);
+      transition: 0.3s ease;
+    }
+
+    #botonPlay:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 32px rgba(255, 84, 199, 1);
+    }
+
+    #botonPlay:disabled {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    #fraseEspecial {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      z-index: 10;
+      width: min(850px, 88%);
+      max-height: 76vh;
+      overflow-y: auto;
+      padding: 28px;
+      transform: translate(-50%, -50%) scale(0.85);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 24px;
+      background: rgba(14, 4, 34, 0.78);
+      color: #ffeafa;
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      line-height: 1.7;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      box-shadow:
+        0 0 35px rgba(231, 112, 255, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(9px);
+      text-shadow: 0 0 10px rgba(255, 139, 225, 0.7);
+      transition:
+        opacity 1.2s ease,
+        transform 1.2s ease,
+        visibility 1.2s ease;
+    }
+
+    #fraseEspecial.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #fraseEspecial::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    #fraseEspecial::-webkit-scrollbar-thumb {
+      background: #e67bd1;
+      border-radius: 10px;
+    }
+
+    .flotante {
+      position: fixed;
+      bottom: -80px;
+      z-index: 3;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0;
+      animation: flotar linear forwards;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    body.iniciada .flotante {
+      opacity: 1;
+    }
+
+    .girasol {
+      color: #ffd21f;
+    }
+
+    .corazon {
+      color: #ff5cba;
+    }
+
+    .firma {
+      position: fixed;
+      bottom: 15px;
+      left: 0;
+      width: 100%;
+      z-index: 6;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    @keyframes flotar {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(0.5);
+        opacity: 0;
+      }
+
+      12% {
+        opacity: 0.9;
+      }
+
+      50% {
+        transform: translateY(-55vh) translateX(35px) rotate(180deg) scale(0.9);
+      }
+
+      100% {
+        transform: translateY(-125vh) translateX(-40px) rotate(360deg) scale(0.65);
+        opacity: 0;
+      }
+    }
+
+    @keyframes latido {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.03);
+      }
+    }
+
+    @media (max-width: 600px) {
+      #fraseEspecial {
+        width: 90%;
+        max-height: 70vh;
+        padding: 20px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="galaxia"></canvas>
+  <div class="capa-oscura"></div>
+
+  <main class="pantalla">
+    <section class="contenido-inicial">
+      <h1>Espero que te guste</h1>
+
+      <p class="mensaje">
+        Presiona Play y deja que la galaxia te acompañe.
+      </p>
+
+      <button id="botonPlay">▶ Play</button>
+    </section>
+  </main>
+
+  <div id="fraseEspecial"></div>
+
+  <div class="firma">
+    Con todo mi corazón ✨
+  </div>
+
+  <audio id="audio" preload="auto">
+    <source src="cancion.mp3" type="audio/mpeg">
+    Tu navegador no puede reproducir este audio.
+  </audio>
+
+  <script>
+    const canvas = document.getElementById("galaxia");
+    const ctx = canvas.getContext("2d");
+
+    const botonPlay = document.getElementById("botonPlay");
+    const audio = document.getElementById("audio");
+    const fraseEspecial = document.getElementById("fraseEspecial");
+
+    let ancho;
+    let alto;
+    let centroX;
+    let centroY;
+    let tiempo = 0;
+
+    let estrellas = [];
+    let particulas = [];
+
+    let indiceFrase = 0;
+    let temporizadorFrases = null;
+    let frasesIniciadas = false;
+
+    const frases = [
+      {
+        duracion: 20000,
+        texto: `
+          <strong>Échale ganas.</strong><br><br>
+          Sé que hay cansancio, estrés y días difíciles,
+          pero solo son rachas. Recuerda lo fuerte,
+          inteligente y valiente que eres.
+          Puedes con esto y mucho más.
+        `
+      },
+
+      
+
+      
+      {
+        duracion: 30000,
+        texto: `
+          Sé que no todos los días son buenos y que a veces
+          cuesta levantarse y seguir. Sonríe, sé que dentro
+          de ti hay una fuerza enorme, incluso cuando tú misma
+          no la ves.
+
+          <br><br>
+
+          No estás sola y no tienes que ser fuerte todo el tiempo.
+          Está bien llorar, está bien sentirse perdido.
+          Pero, por favor, nunca olvides todo lo que has superado
+          hasta ahora, todo lo que has crecido y todo lo que vales.
+
+          <br><br>
+
+          A veces solo necesitas un respiro, una pausa,
+          una mano que te recuerde que puedes con esto y con más.
+          Hoy quiero ser esa mano, ese recordatorio.
+
+          <br><br>
+
+          No te rindas, porque mi mundo es mejor contigo.
+        `
+      },
+
+      {
+        duracion: 20000,
+        texto: `
+          <strong>Lo estás haciendo bien.</strong><br><br>
+          No te exijas tanto.<br><br>
+          Estás aprendiendo.<br><br>
+          Vas a tu propio ritmo.<br><br>
+          No has dejado de avanzar.<br><br>
+          Qué bonito que existas.<br><br>
+          No dejes de ser tú.
+        `
+      },
+
+      {
+        duracion: 20000,
+        texto: `
+          Échale ganas, bonita.<br><br>
+          No te falta nada. Eres una gran mujer,
+          un amor de persona. Eres trabajadora,
+          estás preciosa, te esfuerzas cada día
+          y tu corazón es noble.<br><br>
+          Yo sí quiero verte triunfar.
+        `
+      },
+
+      {
+        duracion: 30000,
+        texto: `
+          No te falta nada. Eres una gran mujer,
+          un amor de persona y alguien que merece
+          reconocer todo lo bueno que hay en ella.
+
+          <br><br>
+
+          Eres trabajadora, responsable, fuerte
+          y estás guapísima. Te esfuerzas cada día,
+          incluso cuando las cosas no son fáciles,
+          y aun así sigues adelante con valentía.
+
+          <br><br>
+
+          Tienes un corazón noble, una forma hermosa
+          de tratar a los demás y una capacidad enorme
+          para dar amor, apoyo y comprensión.
+        `
+      },
+
+      {
+        duracion: 20000,
+        texto: `
+          No dejes que un mal momento,
+          una decepción o una inseguridad
+          te hagan dudar de tu valor.
+
+          <br><br>
+
+          Hay muchas cosas que has superado,
+          muchas metas que has alcanzado
+          y muchas personas que agradecen
+          tenerte en su vida.
+        `
+      },
+
+      {
+        duracion: 20000,
+        texto: `
+          Si algún día decides volver e intentarlo de nuevo,
+          búscame, escríbeme, llámame, no tengas miedo...
+
+          <br><br>
+
+          Porque hay algo que te puedo prometer:
+          siempre estaré esperando.
+        `
+      },
+
+      {
+        duracion: 20000,
+        texto: `
+          Te voy a esperar el tiempo que sea necesario.
+          En ese tiempo voy a trabajar en mí y en ser una mejor persona.
+
+          <br><br>
+
+          Para cuando vuelvas, quiero demostrártelo con hechos,
+          con mucho amor y con todo lo que estoy dispuesto a cambiar.
+        `
+      }
+    ];
+
+    function configurarCanvas() {
+      const escala = Math.min(window.devicePixelRatio || 1, 2);
+
+      ancho = window.innerWidth;
+      alto = window.innerHeight;
+      centroX = ancho / 2;
+      centroY = alto / 2;
+
+      canvas.width = ancho * escala;
+      canvas.height = alto * escala;
+      canvas.style.width = ancho + "px";
+      canvas.style.height = alto + "px";
+
+      ctx.setTransform(escala, 0, 0, escala, 0, 0);
+
+      crearEstrellas();
+      crearParticulas();
+    }
+
+    function crearEstrellas() {
+      estrellas = [];
+
+      const cantidad = Math.floor((ancho * alto) / 2600);
+
+      for (let i = 0; i < cantidad; i++) {
+        estrellas.push({
+          x: Math.random() * ancho,
+          y: Math.random() * alto,
+          radio: Math.random() * 1.5 + 0.15,
+          brillo: Math.random() * Math.PI * 2,
+          velocidad: Math.random() * 0.03 + 0.01,
+          color: Math.random() > 0.8 ? "#ffd6f6" : "#dfe7ff"
+        });
+      }
+    }
+
+    function crearParticulas() {
+      particulas = [];
+
+      const cantidad = Math.floor(Math.min(ancho, alto) * 2.2);
+      const radioMaximo = Math.min(ancho, alto) * 0.48;
+
+      for (let i = 0; i < cantidad; i++) {
+        const brazo = Math.floor(Math.random() * 5);
+        const distancia = Math.pow(Math.random(), 0.56) * radioMaximo;
+        const desviacion = (Math.random() - 0.5) * 0.8;
+
+        const angulo =
+          brazo * (Math.PI * 2 / 5) +
+          distancia * 0.05 +
+          desviacion;
+
+        particulas.push({
+          x: Math.cos(angulo) * distancia,
+          y: Math.sin(angulo) * distancia * 0.52,
+          tamano: Math.random() * 2 + 0.2,
+          opacidad: Math.random() * 0.8 + 0.12,
+          color:
+            Math.random() > 0.72
+              ? "255, 185, 225"
+              : Math.random() > 0.45
+              ? "170, 126, 255"
+              : "255, 255, 255"
+        });
+      }
+    }
+
+    function dibujarFondo() {
+      const fondo = ctx.createRadialGradient(
+        centroX,
+        centroY,
+        0,
+        centroX,
+        centroY,
+        Math.max(ancho, alto) * 0.8
+      );
+
+      fondo.addColorStop(0, "#3d165f");
+      fondo.addColorStop(0.22, "#1d0d3f");
+      fondo.addColorStop(0.6, "#090c25");
+      fondo.addColorStop(1, "#010107");
+
+      ctx.fillStyle = fondo;
+      ctx.fillRect(0, 0, ancho, alto);
+    }
+
+    function dibujarEstrellas() {
+      estrellas.forEach((estrella) => {
+        estrella.brillo += estrella.velocidad;
+
+        const opacidad = 0.45 + Math.sin(estrella.brillo) * 0.35;
+
+        ctx.beginPath();
+        ctx.arc(estrella.x, estrella.y, estrella.radio, 0, Math.PI * 2);
+        ctx.globalAlpha = opacidad;
+        ctx.fillStyle = estrella.color;
+        ctx.fill();
+      });
+
+      ctx.globalAlpha = 1;
+    }
+
+    function dibujarGalaxia() {
+      ctx.save();
+
+      ctx.translate(centroX, centroY);
+      ctx.rotate(-0.18);
+
+      const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, 240);
+
+      halo.addColorStop(0, "rgba(255, 255, 255, 1)");
+      halo.addColorStop(0.08, "rgba(255, 225, 255, 0.9)");
+      halo.addColorStop(0.3, "rgba(190, 92, 255, 0.35)");
+      halo.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 290, 150, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const rotacion = tiempo * 0.00009;
+
+      particulas.forEach((particula) => {
+        const x =
+          particula.x * Math.cos(rotacion) -
+          particula.y * Math.sin(rotacion);
+
+        const y =
+          particula.x * Math.sin(rotacion) +
+          particula.y * Math.cos(rotacion);
+
+        ctx.beginPath();
+        ctx.arc(x, y, particula.tamano, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${particula.color}, ${particula.opacidad})`;
+        ctx.fill();
+      });
+
+      ctx.restore();
+    }
+
+    function animar() {
+      tiempo += 16;
+
+      dibujarFondo();
+      dibujarEstrellas();
+      dibujarGalaxia();
+
+      requestAnimationFrame(animar);
+    }
+
+    function crearFlotante(tipo) {
+      const elemento = document.createElement("span");
+
+      elemento.className = `flotante ${tipo}`;
+      elemento.textContent = tipo === "girasol" ? "🌻" : "♥";
+      elemento.style.left = Math.random() * 100 + "vw";
+      elemento.style.fontSize = Math.random() * 12 + 14 + "px";
+      elemento.style.animationDuration = Math.random() * 7 + 9 + "s";
+
+      document.body.appendChild(elemento);
+
+      setTimeout(() => {
+        elemento.remove();
+      }, 18000);
+    }
+
+    function iniciarElementosFlotantes() {
+      setInterval(() => {
+        if (document.body.classList.contains("iniciada")) {
+          const tipo = Math.random() > 0.35 ? "girasol" : "corazon";
+          crearFlotante(tipo);
+        }
+      }, 500);
+    }
+
+    function mostrarFrase() {
+      if (indiceFrase >= frases.length) {
+        fraseEspecial.classList.remove("visible");
+        return;
+      }
+
+      const frase = frases[indiceFrase];
+
+      fraseEspecial.innerHTML = frase.texto;
+      fraseEspecial.classList.remove("visible");
+
+      setTimeout(() => {
+        fraseEspecial.classList.add("visible");
+      }, 100);
+
+      temporizadorFrases = setTimeout(() => {
+        fraseEspecial.classList.remove("visible");
+        indiceFrase++;
+
+        setTimeout(mostrarFrase, 1200);
+      }, frase.duracion);
+    }
+
+    function iniciarFrases() {
+      if (frasesIniciadas) return;
+
+      frasesIniciadas = true;
+      indiceFrase = 0;
+
+      temporizadorFrases = setTimeout(mostrarFrase, 20000);
+    }
+
+    function detenerFrases() {
+      clearTimeout(temporizadorFrases);
+      fraseEspecial.classList.remove("visible");
+      frasesIniciadas = false;
+      indiceFrase = 0;
+    }
+
+    botonPlay.addEventListener("click", async () => {
+      try {
+        await audio.play();
+
+        document.body.classList.add("iniciada");
+
+        botonPlay.textContent = "♪ Reproduciendo...";
+        botonPlay.disabled = true;
+
+        iniciarFrases();
+      } catch (error) {
+        alert(
+          "No se pudo reproducir la música. Verifica que el archivo cancion.mp3 esté en la misma carpeta que index.html."
+        );
+      }
+    });
+
+    audio.addEventListener("ended", () => {
+      detenerFrases();
+
+      botonPlay.textContent = "✓ La canción terminó";
+      botonPlay.disabled = false;
+    });
+
+    window.addEventListener("resize", configurarCanvas);
+
+    configurarCanvas();
+    animar();
+    iniciarElementosFlotantes();
+  </script>
+</body>
+</html>
